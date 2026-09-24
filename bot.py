@@ -1,15 +1,10 @@
 # -----------------------------------------------------------------------------
-# Project: GagaraGogo Userbot
+# Project: GagaraGogo Setup Bot
+# Component: bot.py
 # Author: chaolcam (https://github.com/chaolcam/gagaragogo-userbot)
-# License: MIT License
+# License: GNU GPL v3.0
 # Copyright (c) 2026 chaolcam
-#
-# Module: GagaraGogo Setup & Deploy Assistant (bot.py)
-# Security: SIFIR VERİ DEPOLAMA (Zero-Persistence).
-#           Hiçbir şifre, kod veya session diske/veritabanına yazılmaz.
-#           İşlem bitiminde veya iptal edildiğinde hafıza anında imha edilir.
 # -----------------------------------------------------------------------------
-
 import os
 import re
 import asyncio
@@ -81,8 +76,83 @@ ggr_app = Client(
     in_memory=True
 )
 
-def ggr_get_start_content(first_name: str):
-    """Karşılama metni ve butonlarını üretir."""
+def ggr_get_lang_selection(first_name: str):
+    """Dil seçim ekranını oluşturur."""
+    metin = (
+        f"👋 <b>Merhaba {first_name}! / Hello {first_name}!</b>\n\n"
+        f"🤖 <b>GagaraGogo Userbot Kurulum Asistanı</b>\n"
+        f"Lütfen devam etmek istediğiniz dili seçin:\n"
+        f"Please select your preferred language:"
+    )
+    butonlar = InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("🇹🇷 Türkçe", callback_data="ggr_set_lang_tr"),
+            InlineKeyboardButton("🇬🇧 English", callback_data="ggr_set_lang_en")
+        ]
+    ])
+    return metin, butonlar
+
+def ggr_get_start_content(first_name: str, lang: str = "tr"):
+    """Karşılama metni ve butonlarını seçilen dilde üretir."""
+    if lang == "en":
+        metin = (
+            f"👋 <b>Hello {first_name}!</b>\n\n"
+            f"🤖 Welcome to <b>GagaraGogo Userbot Automated Setup Assistant</b>.\n\n"
+            f"With this assistant, without writing a single line of code:\n"
+            f"1️⃣ Connect your Render account,\n"
+            f"2️⃣ Retrieve API ID and HASH from <code>my.telegram.org</code>,\n"
+            f"3️⃣ Generate your Pyrogram String Session,\n"
+            f"4️⃣ Create an assistant bot automatically via <code>@BotFather</code>,\n"
+            f"5️⃣ Deploy your userbot to Render with a 24/7 Uptime monitor!\n\n"
+            f"🔒 <b>Security & Zero Storage:</b>\n"
+            f"<i>Your phone numbers, passwords, and sessions are NEVER stored.</i>\n\n"
+            f"⏳ <b>Privacy Protection:</b>\n"
+            f"• Completed setups: <b>After 5 minutes</b>\n"
+            f"• Cancelled or idle setups: <b>After 30 minutes</b>\n"
+            f"all messages in this chat will be completely and automatically wiped!\n\n"
+            f"⚠️ <b>Disclaimer:</b>\n"
+            f"<i>Userbots carry potential risks under Telegram Terms of Service. You are solely responsible for your account actions.</i>\n\n"
+            f"📁 <b>Source Code:</b>\n"
+            f"<a href='https://github.com/chaolcam/gagaragogo-kurulum-bot'>github.com/chaolcam/gagaragogo-kurulum-bot</a>"
+        )
+        butonlar = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🚀 Start Setup", callback_data="ggr_kur_basla")],
+            [InlineKeyboardButton("🗑️ Remove Bot from Account", callback_data="ggr_kaldir_basla")],
+            [InlineKeyboardButton("🌐 Dil / Language (TR / EN)", callback_data="ggr_lang_change")],
+            [InlineKeyboardButton("ℹ️ Privacy & Security", callback_data="ggr_bilgi")],
+            [InlineKeyboardButton("📁 GitHub Repository", url="https://github.com/chaolcam/gagaragogo-kurulum-bot")]
+        ])
+        return metin, butonlar
+
+    metin = (
+        f"👋 <b>Merhaba {first_name}!</b>\n\n"
+        f"🤖 <b>GagaraGogo Userbot Otomatik Kurulum Asistanı</b>'na hoş geldiniz.\n\n"
+        f"Bu asistan ile hiçbir kodlama yapmadan:\n"
+        f"1️⃣ Render hesabınıza bağlanır,\n"
+        f"2️⃣ <code>my.telegram.org</code> üzerinden API ID ve HASH alınır,\n"
+        f"3️⃣ String Session üretilir,\n"
+        f"4️⃣ <code>@BotFather</code> üzerinden otomatik yardımcı bot açılır,\n"
+        f"5️⃣ Botunuz Render'a kurulur ve 7/24 Uptime linkiniz teslim edilir!\n\n"
+        f"🔒 <b>Güvenlik & Sıfır Depolama:</b>\n"
+        f"<i>Girdiğiniz telefon, şifre ve kodlar sunucularımızda ASLA depolanmaz.</i>\n\n"
+        f"⏳ <b>Otomatik Gizlilik Koruması:</b>\n"
+        f"• Başarılı kurulumlarda: <b>5 dakika sonra</b>\n"
+        f"• Yarım kalan veya iptal edilen işlemlerde: <b>30 dakika sonra</b>\n"
+        f"bu sohbetteki tüm mesajlar güvenliğiniz için otomatik olarak tamamen silinir!\n\n"
+        f"⚠️ <b>Sorumluluk Reddi (Disclaimer):</b>\n"
+        f"<i>Userbot kullanımı Telegram şartları gereği hesabınız için risk taşıyabilir. Hesabınızdan ve yaptığınız işlemlerden bizzat kendiniz sorumlusunuz; geliştiriciler hiçbir sorumluluk kabul etmez. Kuruluma başlayarak bu şartları peşinen kabul etmiş sayılırsınız.</i>\n\n"
+        f"📁 <b>Açık Kaynak Kodları:</b>\n"
+        f"<a href='https://github.com/chaolcam/gagaragogo-kurulum-bot'>github.com/chaolcam/gagaragogo-kurulum-bot</a>"
+    )
+
+    butonlar = InlineKeyboardMarkup([
+        [InlineKeyboardButton("🚀 Kuruluma Başla", callback_data="ggr_kur_basla")],
+        [InlineKeyboardButton("🗑️ Botumu Hesaptan Kaldır", callback_data="ggr_kaldir_basla")],
+        [InlineKeyboardButton("🌐 Dil / Language (TR / EN)", callback_data="ggr_lang_change")],
+        [InlineKeyboardButton("ℹ️ Güvenlik & Gizlilik", callback_data="ggr_bilgi")],
+        [InlineKeyboardButton("📁 Kaynak Kodları (GitHub)", url="https://github.com/chaolcam/gagaragogo-kurulum-bot")]
+    ])
+    return metin, butonlar
     metin = (
         f"👋 <b>Merhaba {first_name}!</b>\n\n"
         f"🤖 <b>GagaraGogo Userbot Otomatik Kurulum Asistanı</b>'na hoş geldiniz.\n\n"
@@ -214,7 +284,8 @@ async def ggr_start_handler(client, message):
     u_data["first_name"] = first_name
     u_data["start_msg_id"] = message.id
 
-    metin, butonlar = ggr_get_start_content(first_name)
+    # Kullanıcıya ilk girişte veya /start anında dil sorulur
+    metin, butonlar = ggr_get_lang_selection(first_name)
     await message.reply_text(metin, reply_markup=butonlar, disable_web_page_preview=True)
     ggr_schedule_inactivity_cleanup(client, user_id, first_name, timeout_seconds=1800)
 
@@ -264,7 +335,26 @@ async def ggr_callback_handler(client, query):
     data = query.data
     ggr_schedule_inactivity_cleanup(client, user_id, first_name, timeout_seconds=1800)
 
-    if data in ("ggr_kur_basla", "kur_basla"):
+    if data == "ggr_set_lang_tr":
+        u_data = ggr_get_user_data(user_id)
+        u_data["lang"] = "tr"
+        metin, butonlar = ggr_get_start_content(first_name, lang="tr")
+        await query.message.edit_text(metin, reply_markup=butonlar, disable_web_page_preview=True)
+        await query.answer()
+
+    elif data == "ggr_set_lang_en":
+        u_data = ggr_get_user_data(user_id)
+        u_data["lang"] = "en"
+        metin, butonlar = ggr_get_start_content(first_name, lang="en")
+        await query.message.edit_text(metin, reply_markup=butonlar, disable_web_page_preview=True)
+        await query.answer()
+
+    elif data == "ggr_lang_change":
+        metin, butonlar = ggr_get_lang_selection(first_name)
+        await query.message.edit_text(metin, reply_markup=butonlar, disable_web_page_preview=True)
+        await query.answer()
+
+    elif data in ("ggr_kur_basla", "kur_basla"):
         ggr_wipe_user_data(user_id)
         u_data = ggr_get_user_data(user_id)
         u_data["step"] = "WAIT_RENDER_KEY"
@@ -346,7 +436,9 @@ async def ggr_callback_handler(client, query):
         await query.answer()
 
     elif data == "ggr_ana_menu":
-        metin, butonlar = ggr_get_start_content(first_name)
+        u_data = ggr_get_user_data(user_id)
+        lang = u_data.get("lang", "tr")
+        metin, butonlar = ggr_get_start_content(first_name, lang)
         await query.message.edit_text(metin, reply_markup=butonlar, disable_web_page_preview=True)
         await query.answer()
 

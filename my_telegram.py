@@ -1,13 +1,10 @@
 # -----------------------------------------------------------------------------
-# Project: GagaraGogo Userbot
+# Project: GagaraGogo Setup Bot
+# Component: my_telegram.py
 # Author: chaolcam (https://github.com/chaolcam/gagaragogo-userbot)
-# License: MIT License
+# License: GNU GPL v3.0
 # Copyright (c) 2026 chaolcam
-#
-# Module: GagaraGogo my.telegram.org Web Scraper (my_telegram.py)
-# Security: SIFIR LOGLAMA VE KAYIT. Tüm veriler hafızada geçici tutulur.
 # -----------------------------------------------------------------------------
-
 import re
 import requests
 from bs4 import BeautifulSoup

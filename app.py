@@ -1,12 +1,10 @@
 # -----------------------------------------------------------------------------
-# Project: GagaraGogo Userbot
+# Project: GagaraGogo Setup Bot
+# Component: app.py
 # Author: chaolcam (https://github.com/chaolcam/gagaragogo-userbot)
-# License: MIT License
+# License: GNU GPL v3.0
 # Copyright (c) 2026 chaolcam
-#
-# Module: GagaraGogo Entry Point (app.py)
 # -----------------------------------------------------------------------------
-
 import os
 import logging
 import gradio as gr

@@ -1,13 +1,10 @@
 # -----------------------------------------------------------------------------
-# Project: GagaraGogo Userbot
+# Project: GagaraGogo Setup Bot
+# Component: botfather.py
 # Author: chaolcam (https://github.com/chaolcam/gagaragogo-userbot)
-# License: MIT License
+# License: GNU GPL v3.0
 # Copyright (c) 2026 chaolcam
-#
-# Module: GagaraGogo BotFather Automation with Inline Mode (botfather.py)
-# Security: SIFIR LOGLAMA. Tokenlar diske yazılmaz, sadece oturumda kullanılır.
 # -----------------------------------------------------------------------------
-
 import re
 import random
 import string

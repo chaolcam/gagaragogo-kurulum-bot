@@ -1,16 +1,10 @@
 # -----------------------------------------------------------------------------
-# Project: GagaraGogo Userbot
+# Project: GagaraGogo Setup Bot
+# Component: render_deployer.py
 # Author: chaolcam (https://github.com/chaolcam/gagaragogo-userbot)
-# License: MIT License
+# License: GNU GPL v3.0
 # Copyright (c) 2026 chaolcam
-#
-# Module: GagaraGogo Render REST API Deployer (render_deployer.py)
-# Features:
-#   - Tek tıkla servisi oluşturur ve environment variable'ları doldurur.
-#   - Her kullanıcıya atanan tekil (unique) onrender URL'ini dinamik çeker.
-#   - Botu ve servisi Render hesabından tamamen kaldırma (/kaldir).
 # -----------------------------------------------------------------------------
-
 import aiohttp
 
 GGR_RENDER_API_BASE = "https://api.render.com/v1"

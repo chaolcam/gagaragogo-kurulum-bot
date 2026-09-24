@@ -1,13 +1,10 @@
 # -----------------------------------------------------------------------------
-# Project: GagaraGogo Userbot
+# Project: GagaraGogo Setup Bot
+# Component: session_generator.py
 # Author: chaolcam (https://github.com/chaolcam/gagaragogo-userbot)
-# License: MIT License
+# License: GNU GPL v3.0
 # Copyright (c) 2026 chaolcam
-#
-# Module: GagaraGogo In-Memory Session Generator (session_generator.py)
-# Security: SIFIR LOGLAMA VE KAYIT. Diske hiçbir .session dosyası yazılmaz.
 # -----------------------------------------------------------------------------
-
 import asyncio
 from pyrogram import Client
 from pyrogram.errors import SessionPasswordNeeded, PhoneCodeInvalid, PhoneCodeExpired, PasswordHashInvalid
