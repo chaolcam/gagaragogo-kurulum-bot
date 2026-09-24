@@ -8,6 +8,7 @@
 import os
 import re
 import asyncio
+from lang import get_text
 import logging
 from pyrogram import Client, filters
 from pyrogram.types import (
@@ -76,81 +77,26 @@ ggr_app = Client(
     in_memory=True
 )
 
-def ggr_get_lang_selection(first_name: str):
+def ggr_get_lang_selection(first_name: str, lang: str = "tr"):
     """Dil seçim ekranını oluşturur."""
-    metin = (
-        f"👋 <b>Merhaba {first_name}! / Hello {first_name}!</b>\n\n"
-        f"🤖 <b>GagaraGogo Userbot Kurulum Asistanı</b>\n"
-        f"Lütfen devam etmek istediğiniz dili seçin:\n"
-        f"Please select your preferred language:"
-    )
+    metin = get_text(lang, "lang_selection", first_name=first_name)
     butonlar = InlineKeyboardMarkup([
         [
-            InlineKeyboardButton("🇹🇷 Türkçe", callback_data="ggr_set_lang_tr"),
-            InlineKeyboardButton("🇬🇧 English", callback_data="ggr_set_lang_en")
+            InlineKeyboardButton(get_text("tr", "start_tr_btn"), callback_data="ggr_set_lang_tr"),
+            InlineKeyboardButton(get_text("en", "start_en_btn"), callback_data="ggr_set_lang_en")
         ]
     ])
     return metin, butonlar
 
 def ggr_get_start_content(first_name: str, lang: str = "tr"):
     """Karşılama metni ve butonlarını seçilen dilde üretir."""
-    if lang == "en":
-        metin = (
-            f"👋 <b>Hello {first_name}!</b>\n\n"
-            f"🤖 Welcome to <b>GagaraGogo Userbot Automated Setup Assistant</b>.\n\n"
-            f"With this assistant, without writing a single line of code:\n"
-            f"1️⃣ Connect your Render account,\n"
-            f"2️⃣ Retrieve API ID and HASH from <code>my.telegram.org</code>,\n"
-            f"3️⃣ Generate your Pyrogram String Session,\n"
-            f"4️⃣ Create an assistant bot automatically via <code>@BotFather</code>,\n"
-            f"5️⃣ Deploy your userbot to Render with a 24/7 Uptime monitor!\n\n"
-            f"🔒 <b>Security & Zero Storage:</b>\n"
-            f"<i>Your phone numbers, passwords, and sessions are NEVER stored.</i>\n\n"
-            f"⏳ <b>Privacy Protection:</b>\n"
-            f"• Completed setups: <b>After 5 minutes</b>\n"
-            f"• Cancelled or idle setups: <b>After 30 minutes</b>\n"
-            f"all messages in this chat will be completely and automatically wiped!\n\n"
-            f"⚠️ <b>Disclaimer:</b>\n"
-            f"<i>Userbots carry potential risks under Telegram Terms of Service. You are solely responsible for your account actions.</i>\n\n"
-            f"📁 <b>Source Code:</b>\n"
-            f"<a href='https://github.com/chaolcam/gagaragogo-kurulum-bot'>github.com/chaolcam/gagaragogo-kurulum-bot</a>"
-        )
-        butonlar = InlineKeyboardMarkup([
-            [InlineKeyboardButton("🚀 Start Setup", callback_data="ggr_kur_basla")],
-            [InlineKeyboardButton("🗑️ Remove Bot from Account", callback_data="ggr_kaldir_basla")],
-            [InlineKeyboardButton("🌐 Dil / Language (TR / EN)", callback_data="ggr_lang_change")],
-            [InlineKeyboardButton("ℹ️ Privacy & Security", callback_data="ggr_bilgi")],
-            [InlineKeyboardButton("📁 GitHub Repository", url="https://github.com/chaolcam/gagaragogo-kurulum-bot")]
-        ])
-        return metin, butonlar
-
-    metin = (
-        f"👋 <b>Merhaba {first_name}!</b>\n\n"
-        f"🤖 <b>GagaraGogo Userbot Otomatik Kurulum Asistanı</b>'na hoş geldiniz.\n\n"
-        f"Bu asistan ile hiçbir kodlama yapmadan:\n"
-        f"1️⃣ Render hesabınıza bağlanır,\n"
-        f"2️⃣ <code>my.telegram.org</code> üzerinden API ID ve HASH alınır,\n"
-        f"3️⃣ String Session üretilir,\n"
-        f"4️⃣ <code>@BotFather</code> üzerinden otomatik yardımcı bot açılır,\n"
-        f"5️⃣ Botunuz Render'a kurulur ve 7/24 Uptime linkiniz teslim edilir!\n\n"
-        f"🔒 <b>Güvenlik & Sıfır Depolama:</b>\n"
-        f"<i>Girdiğiniz telefon, şifre ve kodlar sunucularımızda ASLA depolanmaz.</i>\n\n"
-        f"⏳ <b>Otomatik Gizlilik Koruması:</b>\n"
-        f"• Başarılı kurulumlarda: <b>5 dakika sonra</b>\n"
-        f"• Yarım kalan veya iptal edilen işlemlerde: <b>30 dakika sonra</b>\n"
-        f"bu sohbetteki tüm mesajlar güvenliğiniz için otomatik olarak tamamen silinir!\n\n"
-        f"⚠️ <b>Sorumluluk Reddi (Disclaimer):</b>\n"
-        f"<i>Userbot kullanımı Telegram şartları gereği hesabınız için risk taşıyabilir. Hesabınızdan ve yaptığınız işlemlerden bizzat kendiniz sorumlusunuz; geliştiriciler hiçbir sorumluluk kabul etmez. Kuruluma başlayarak bu şartları peşinen kabul etmiş sayılırsınız.</i>\n\n"
-        f"📁 <b>Açık Kaynak Kodları:</b>\n"
-        f"<a href='https://github.com/chaolcam/gagaragogo-kurulum-bot'>github.com/chaolcam/gagaragogo-kurulum-bot</a>"
-    )
-
+    metin = get_text(lang, "start_welcome", first_name=first_name)
     butonlar = InlineKeyboardMarkup([
-        [InlineKeyboardButton("🚀 Kuruluma Başla", callback_data="ggr_kur_basla")],
-        [InlineKeyboardButton("🗑️ Botumu Hesaptan Kaldır", callback_data="ggr_kaldir_basla")],
-        [InlineKeyboardButton("🌐 Dil / Language (TR / EN)", callback_data="ggr_lang_change")],
-        [InlineKeyboardButton("ℹ️ Güvenlik & Gizlilik", callback_data="ggr_bilgi")],
-        [InlineKeyboardButton("📁 Kaynak Kodları (GitHub)", url="https://github.com/chaolcam/gagaragogo-kurulum-bot")]
+        [InlineKeyboardButton(get_text(lang, "btn_start_setup"), callback_data="ggr_kur_basla")],
+        [InlineKeyboardButton(get_text(lang, "btn_remove_bot"), callback_data="ggr_kaldir_basla")],
+        [InlineKeyboardButton(get_text(lang, "btn_lang_change"), callback_data="ggr_lang_change")],
+        [InlineKeyboardButton(get_text(lang, "btn_privacy"), callback_data="ggr_bilgi")],
+        [InlineKeyboardButton(get_text(lang, "btn_github"), url="https://github.com/chaolcam/gagaragogo-kurulum-bot")]
     ])
     return metin, butonlar
     metin = (
@@ -191,13 +137,14 @@ async def ggr_otomatik_sohbet_temizleyici(client, user_id, first_name, delay=300
     """
     try:
         await asyncio.sleep(delay)
+        lang = ggr_get_user_data(user_id).get("lang", "tr")
 
         durum_metni = (
-            "⏳ <b>Süre Doldu!</b>\n"
-            "Güvenliğiniz için kurulum mesajları ve hassas veriler temizleniyor..."
+            get_text(lang, "timeout_title") +
+            get_text(lang, "cleaning_up")
             if is_success else
-            "⏳ <b>Süre Doldu!</b>\n"
-            "Güvenliğiniz için yarım kalan işlem ve sohbet geçmişi temizleniyor..."
+            get_text(lang, "timeout_title") +
+            get_text(lang, "cleaning_up")
         )
         try:
             notice_msg = await client.send_message(chat_id=user_id, text=durum_metni)
@@ -221,24 +168,21 @@ async def ggr_otomatik_sohbet_temizleyici(client, user_id, first_name, delay=300
         # Temizlik bitince notice_msg'i kalıcı güvenli durum mesajı ve butonlar ile güncelle
         if is_success:
             final_text = (
-                "🔒 <b>Güvenlik Temizliği Tamamlandı!</b>\n\n"
-                "Önceki tüm kurulum mesajları, hassas anahtarlarınız ve sohbet geçmişiniz gizliliğiniz için kalıcı olarak silinmiştir.\n\n"
-                "✅ <b>Botunuz 7/24 kesintisiz çalışmaya devam etmektedir.</b>\n"
-                "<i>(Kurulum ve erişim bilgileriniz Telegram Kayıtlı Mesajlar sohbetinizde saklanmaktadır.)</i>\n\n"
-                "Botu kaldırmak veya yeniden işlem yapmak isterseniz aşağıdaki butonları kullanabilirsiniz:"
+                get_text(lang, "clean_complete_title") +
+                get_text(lang, "clean_complete_msg") + "\\n\\n" +
+                get_text(lang, "clean_success_msg")
             )
         else:
             final_text = (
-                "🔒 <b>Güvenlik Temizliği Tamamlandı!</b>\n\n"
-                "Yarım kalan işlem ve sohbetteki tüm önceki mesajlar güvenliğiniz için kalıcı olarak silinmiştir.\n\n"
-                "Yeniden başlamak veya botu kaldırmak isterseniz aşağıdaki butonları kullanabilirsiniz:"
+                get_text(lang, "clean_complete_title") +
+                get_text(lang, "timeout_msg")
             )
 
         final_buttons = InlineKeyboardMarkup([
-            [InlineKeyboardButton("🚀 Yeniden Kuruluma Başla", callback_data="ggr_kur_basla")],
-            [InlineKeyboardButton("🗑️ Botumu Hesaptan Kaldır", callback_data="ggr_kaldir_basla")],
-            [InlineKeyboardButton("ℹ️ Güvenlik & Gizlilik", callback_data="ggr_bilgi")],
-            [InlineKeyboardButton("📂 Kaynak Kodları (GitHub)", url="https://github.com/chaolcam/gagaragogo-kurulum-bot")]
+            [InlineKeyboardButton(get_text(lang, "btn_restart_setup"), callback_data="ggr_kur_basla")],
+            [InlineKeyboardButton(get_text(lang, "btn_remove_bot"), callback_data="ggr_kaldir_basla")],
+            [InlineKeyboardButton(get_text(lang, "btn_privacy"), callback_data="ggr_bilgi")],
+            [InlineKeyboardButton(get_text(lang, "btn_github"), url="https://github.com/chaolcam/gagaragogo-kurulum-bot")]
         ])
 
         if notice_msg:
@@ -249,11 +193,10 @@ async def ggr_otomatik_sohbet_temizleyici(client, user_id, first_name, delay=300
         else:
             await client.send_message(chat_id=user_id, text=final_text, reply_markup=final_buttons)
 
-        ggr_wipe_user_data(user_id)
-    except asyncio.CancelledError:
-        pass
     except Exception as e:
         logging.warning(f"Temizlik hatası ({user_id}): {e}")
+    finally:
+        ggr_wipe_user_data(user_id)
 
 def ggr_schedule_inactivity_cleanup(client, user_id, first_name, timeout_seconds=1800):
     """30 dakika boyunca işlem yapılmazsa sohbeti temizler ve güvenli menüyü gösterir."""
@@ -318,9 +261,7 @@ async def ggr_cancel_handler(client, message):
     ggr_wipe_user_data(user_id)
 
     await message.reply_text(
-        "❌ <b>İşlem iptal edildi.</b>\n\n"
-        "Tüm geçici veriler hafızadan silindi.\n"
-        "⏳ <i>Güvenliğiniz için bu sohbet 30 dakika içinde otomatik olarak temizlenecektir.</i>",
+        get_text(ggr_get_user_data(user_id).get("lang", "tr"), "cancel_full"),
         reply_markup=ReplyKeyboardRemove()
     )
     ggr_schedule_inactivity_cleanup(client, user_id, first_name, timeout_seconds=1800)
@@ -367,7 +308,7 @@ async def ggr_callback_handler(client, query):
             await client.send_photo(
                 chat_id=user_id,
                 photo=ggr_get_asset_photo("RENDERADIM1.png"),
-                caption="📸 <b>Render - 1. Adım:</b>\nSağ üstteki profil simgenize (daire içindeki alana) tıklayın, ardından açılan menüden okla gösterilen <b>Account settings</b> kısmına basın."
+                caption=get_text(u_data.get("lang", "tr"), "render_step_1_cap")
             )
         except Exception as e:
             logging.warning(f"Render Adım 1 görsel gönderme hatası: {e}")
@@ -377,25 +318,14 @@ async def ggr_callback_handler(client, query):
             await client.send_photo(
                 chat_id=user_id,
                 photo=ggr_get_asset_photo("RENDERADIM2.png"),
-                caption=(
-                    "📸 <b>Render - 2. Adım:</b>\n"
-                    "Sol menüden <b>API Keys</b> sekmesine gelin ve <b>Create API Key</b> butonuna basın. "
-                    "Açılan kutuda bir isim verip onaylayın. Size verilen <code>rnd_...</code> ile başlayan API anahtarınızı kopyalayın."
-                )
+                caption=get_text(u_data.get("lang", "tr"), "render_step_2_cap")
             )
         except Exception as e:
             logging.warning(f"Render Adım 2 görsel gönderme hatası: {e}")
 
         await client.send_message(
             chat_id=user_id,
-            text=(
-                "🌐 <b>Adım 1: Render API Anahtarı</b>\n\n"
-                "Botunuzun 7/24 ücretsiz çalışacağı sunucuyu bağlamak için Render API anahtarınız gereklidir:\n\n"
-                "1️⃣ <a href='https://dashboard.render.com/'>dashboard.render.com</a> adresine gidip hesabınıza giriş yapın.\n"
-                "2️⃣ Yukarıdaki resimli adımlarda gösterildiği gibi <code>rnd_...</code> anahtarınızı oluşturun.\n"
-                "3️⃣ Oluşturulan <code>rnd_...</code> anahtarını kopyalayıp buraya gönderin:\n\n"
-                "❌ <i>İptal etmek için /cancel yazabilirsiniz.</i>"
-            ),
+            text=get_text(u_data.get("lang", "tr"), "step_1_render_key"),
             disable_web_page_preview=True
         )
 
@@ -405,32 +335,19 @@ async def ggr_callback_handler(client, query):
         u_data["step"] = "KALDIR_API_KEY"
         u_data["first_name"] = first_name
         await query.message.reply_text(
-            "🗑️ <b>GagaraGogo Userbot'u Kaldırma</b>\n\n"
-            "Lütfen Render hesabınızdaki servisi silmek için **Render API Anahtarınızı** (`rnd_...`) mesaj olarak gönderin:"
+            get_text(u_data.get("lang", "tr"), "remove_bot_msg")
         )
         await query.answer()
 
     elif data in ("ggr_bilgi", "bilgi"):
-        bilgi_metin = (
-            "🛡️ <b>GagaraGogo Güvenlik & Gizlilik İlkeleri</b>\n\n"
-            "• <b>%100 Açık Kaynak:</b>\n"
-            "Tüm kurulum ve deploy kaynak kodları GitHub üzerinde açıktır:\n"
-            "👉 <a href='https://github.com/chaolcam/gagaragogo-kurulum-bot'>github.com/chaolcam/gagaragogo-kurulum-bot</a>\n\n"
-            "• <b>Sıfır Depolama (Zero-Persistence):</b>\n"
-            "Girdiğiniz API anahtarları, telefon numarası veya onay kodları sunucuda <b>asla</b> veritabanına veya diske kaydedilmez. Sadece o anlık RAM hafızada işlenir ve bittiğinde yok edilir.\n\n"
-            "• <b>Otomatik Sohbet Temizleme:</b>\n"
-            "1️⃣ Başarılı kurulumlarda: <b>5 dakika sonra</b>\n"
-            "2️⃣ Yarım kalan veya iptal edilen işlemlerde: <b>30 dakika sonra</b>\n"
-            "sohbetteki tüm hassas mesajlar güvenliğiniz için otomatik olarak tamamen silinir.\n\n"
-            "• <b>⚠️ Sorumluluk Reddi Beyanı (Disclaimer):</b>\n"
-            "Userbot kullanımı üçüncü parti bir yazılımdır ve Telegram hesabınız sınırlandırılabilir veya yasaklanabilir. Bu açık kaynaklı bir projedir; hesabınızdan ve paylaşımlarınızdan <b>bizzat kendiniz sorumlusunuz</b>. GagaraGogo geliştiricileri ve yöneticileri hiçbir sorumluluk kabul etmemektedir."
-        )
+        lang = ggr_get_user_data(user_id).get("lang", "tr")
+        bilgi_metin = get_text(lang, "privacy_info")
         await query.message.reply_text(
             bilgi_metin,
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("📂 GitHub Kaynak Kodları", url="https://github.com/chaolcam/gagaragogo-kurulum-bot")],
-                [InlineKeyboardButton("⬅️ Ana Menüye Dön", callback_data="ggr_ana_menu")]
+                [InlineKeyboardButton(get_text(lang, "btn_github"), url="https://github.com/chaolcam/gagaragogo-kurulum-bot")],
+                [InlineKeyboardButton(get_text(lang, "btn_back_main"), callback_data="ggr_ana_menu")]
             ])
         )
         await query.answer()
@@ -444,7 +361,7 @@ async def ggr_callback_handler(client, query):
 
     elif data == "ggr_auto_botfather":
         u_data = ggr_get_user_data(user_id)
-        await query.message.edit_text("⏳ <i>@BotFather ile konuşuluyor, yardımcı botunuz ve inline menü açılıyor...</i>")
+        await query.message.edit_text(get_text(u_data.get("lang", "tr"), "wait_botfather"))
         try:
             bf_result = await ggr_create_bot_via_botfather(
                 api_id=u_data["api_id"],
@@ -459,8 +376,7 @@ async def ggr_callback_handler(client, query):
 
         except Exception as e:
             await query.message.reply_text(
-                f"⚠️ Otomatik bot açılırken bir sorun oluştu: `{str(e)}`\n\n"
-                f"Lütfen @BotFather'dan aldığınız bir Bot Token'ı elle mesaj olarak gönderin:"
+                get_text(u_data.get("lang", "tr"), "auto_bot_error", e=str(e))
             )
             u_data["step"] = "WAIT_MANUAL_BOT_TOKEN"
 
@@ -468,8 +384,7 @@ async def ggr_callback_handler(client, query):
         u_data = ggr_get_user_data(user_id)
         u_data["step"] = "WAIT_MANUAL_BOT_TOKEN"
         await query.message.reply_text(
-            "✏️ Lütfen @BotFather'dan aldığınız bot tokenınızı yapıştırın:\n"
-            "Örnek: `1234567890:ABCdef...`"
+            get_text(u_data.get("lang", "tr"), "manual_bot_msg")
         )
         await query.answer()
 
@@ -479,16 +394,13 @@ async def ggr_callback_handler(client, query):
         u_data["api_hash"] = "b18441a1ff607e10a989891a5462e627"
 
         await query.message.edit_text(
-            "✅ <b>Telegram Resmi Android API Seçildi!</b>\n"
-            "• API ID: <code>2040</code>\n"
-            "• API HASH: <code>b18441a1ff607e10a989891a5462e627</code>\n\n"
-            "⏳ <i>Giriş onay kodunuz (SMS/Telegram) gönderiliyor...</i>"
+            get_text(u_data.get("lang", "tr"), "official_api_selected")
         )
         await ggr_start_pyrogram_login(query.message, u_data, user_id)
 
     elif data == "ggr_retry_login":
         u_data = ggr_get_user_data(user_id)
-        await query.message.edit_text("⏳ <i>Giriş kodu tekrar isteniyor...</i>")
+        await query.message.edit_text(get_text(u_data.get("lang", "tr"), "retry_code"))
         await ggr_start_pyrogram_login(query.message, u_data, user_id)
 
 # =====================================================================
@@ -504,17 +416,17 @@ async def ggr_message_flow(client, message):
 
     step = u_data.get("step")
     if not step:
-        await message.reply_text("Lütfen kuruluma başlamak için /start komutunu kullanın.")
+        await message.reply_text(get_text(u_data.get("lang", "tr"), "start_command_required"))
         return
 
     # --- 1. ADIM: RENDER API KEY ALMA VE DOĞRULAMA ---
     if step == "WAIT_RENDER_KEY":
         render_key = message.text.strip()
         if not render_key.startswith("rnd_"):
-            await message.reply_text("⚠️ Render API anahtarları `rnd_` ile başlar. Lütfen doğru anahtarı girdiğinizden emin olun:")
+            await message.reply_text(get_text(u_data.get("lang", "tr"), "invalid_render_key"))
             return
 
-        msg_wait = await message.reply_text("⏳ <i>Render API anahtarı doğrulanıyor...</i>")
+        msg_wait = await message.reply_text(get_text(u_data.get("lang", "tr"), "verifying_render_key"))
         try:
             deployer = GgrRenderDeployer(render_key)
             owner_id = await deployer.get_owner_id()
@@ -524,21 +436,17 @@ async def ggr_message_flow(client, message):
 
             u_data["step"] = "WAIT_PHONE"
             kb = ReplyKeyboardMarkup(
-                [[KeyboardButton("📱 Telefon Numaramı Paylaş", request_contact=True)]],
+                [[KeyboardButton(get_text(u_data.get("lang", "tr"), "btn_share_phone"), request_contact=True)]],
                 resize_keyboard=True,
                 one_time_keyboard=True
             )
             await msg_wait.delete()
             await message.reply_text(
-                "✅ <b>Render API Anahtarı Doğrulandı!</b>\n\n"
-                "📱 <b>Adım 2: Telegram Telefon Numarası</b>\n\n"
-                "Aşağıdaki butona basarak telefon numaranızı paylaşın veya uluslararası formatta yazın:\n"
-                "Örnek: `+905551234567`\n\n"
-                "🔒 <i>Numaranız sadece anlık Telegram doğrulama kodu istemek için kullanılır, ASLA kaydedilmez.</i>",
+                get_text(u_data.get("lang", "tr"), "render_key_success"),
                 reply_markup=kb
             )
         except Exception as e:
-            await msg_wait.edit_text(f"❌ <b>Hata:</b> {str(e)}\n\nLütfen Render API anahtarınızı kontrol edip tekrar gönderin:")
+            await msg_wait.edit_text(get_text(u_data.get("lang", "tr"), "render_key_error", e=str(e)))
 
     # --- 2. ADIM: TELEFON NUMARASI ALMA ---
     elif step == "WAIT_PHONE":
@@ -552,13 +460,12 @@ async def ggr_message_flow(client, message):
             clean_phone = "+" + clean_phone
 
         if len(clean_phone) < 10:
-            await message.reply_text("❌ Geçersiz telefon numarası. Lütfen örn: `+905551234567` şeklinde yazın:")
+            await message.reply_text(get_text(u_data.get("lang", "tr"), "invalid_phone"))
             return
 
         u_data["phone"] = clean_phone
         msg_wait = await message.reply_text(
-            f"⏳ <b>my.telegram.org</b> ile iletişim kuruluyor...\n"
-            f"Numara: <code>{clean_phone}</code>",
+            get_text(u_data.get("lang", "tr"), "contacting_my_tg", phone=clean_phone),
             reply_markup=ReplyKeyboardRemove()
         )
 
@@ -570,12 +477,7 @@ async def ggr_message_flow(client, message):
             if login_web_result.get("status") == "success":
                 u_data["step"] = "WAIT_MYTG_CODE"
                 await msg_wait.edit_text(
-                    "📨 <b>Telegram Doğrulama Kodu Gönderildi!</b>\n\n"
-                    "Telegram resmi bildirimlerinden gelen web giriş kodunu buraya gönderin.\n\n"
-                    "⚠️ <b>ÖNEMLİ FORMAT UYARISI:</b>\n"
-                    "Telegram gelen kodların otomatik doğrulanmasını engellediği için lütfen kodu <b>aralarında boşluk bırakarak</b> yazın:\n"
-                    "👉 <i>Örnek: Kod <code>93964</code> ise buraya <code>9 3 9 6 4</code> veya <code>9.3.9.6.4</code> şeklinde yazın.</i>\n\n"
-                    "❌ <i>İptal etmek için /cancel yazabilirsiniz.</i>"
+                    get_text(u_data.get("lang", "tr"), "tg_code_sent")
                 )
                 return
 
@@ -584,12 +486,10 @@ async def ggr_message_flow(client, message):
 
         # Eğer my.telegram.org sitesi açılmazsa kullanıcıya resmi Telegram anahtar seçeneği sun
         await msg_wait.edit_text(
-            "⚠️ <b>my.telegram.org Sitesine Ulaşılamadı</b>\n\n"
-            "Telegram sunucularındaki yoğunluk nedeniyle web sitesi yanıt vermedi.\n"
-            "Ancak endişelenmeyin! Telegram'ın resmi Android uygulamasının hazır ve lisanslı genel API anahtarlarını kullanarak devam edebilirsiniz:",
+            get_text(u_data.get("lang", "tr"), "mytg_unreachable"),
             reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("✅ Resmi Android API ile Devam Et", callback_data="ggr_use_official_api")],
-                [InlineKeyboardButton("❌ İptal Et", callback_data="ggr_cancel")]
+                [InlineKeyboardButton(get_text(u_data.get("lang", "tr"), "btn_use_official_api"), callback_data="ggr_use_official_api")],
+                [InlineKeyboardButton(get_text(u_data.get("lang", "tr"), "btn_cancel"), callback_data="ggr_cancel")]
             ])
         )
 
@@ -598,7 +498,7 @@ async def ggr_message_flow(client, message):
         raw_code = message.text.strip()
         code = re.sub(r"[\s\.\-_,]", "", raw_code)
 
-        msg_wait = await message.reply_text("⏳ <i>my.telegram.org girişi yapılıyor ve API anahtarları alınıyor...</i>")
+        msg_wait = await message.reply_text(get_text(u_data.get("lang", "tr"), "logging_in_mytg"))
         my_tg = u_data.get("my_tg")
         try:
             login_res = await my_tg.login(code)
@@ -611,10 +511,7 @@ async def ggr_message_flow(client, message):
                 u_data["api_hash"] = app_res["api_hash"]
 
                 await msg_wait.edit_text(
-                    f"✅ <b>API Bilgileriniz Başarıyla Alındı!</b>\n\n"
-                    f"• <b>API ID:</b> <code>{app_res['api_id']}</code>\n"
-                    f"• <b>API HASH:</b> <code>{app_res['api_hash']}</code>\n\n"
-                    f"⏳ <i>Şimdi String Session üretmek için Telegram uygulamanıza giriş kodu gönderiliyor...</i>"
+                    get_text(u_data.get("lang", "tr"), "api_retrieved", api_id=app_res['api_id'], api_hash=app_res['api_hash'])
                 )
                 await ggr_start_pyrogram_login(message, u_data, user_id)
             else:
@@ -630,7 +527,7 @@ async def ggr_message_flow(client, message):
         raw_code = message.text.strip()
         code = re.sub(r"[\s\.\-_,]", "", raw_code)
 
-        msg_wait = await message.reply_text("⏳ <i>Oturum açılıyor ve String Session üretiliyor...</i>")
+        msg_wait = await message.reply_text(get_text(u_data.get("lang", "tr"), "generating_session"))
         sess_gen = u_data.get("sess_gen")
 
         try:
@@ -649,12 +546,12 @@ async def ggr_message_flow(client, message):
             else:
                 raise Exception(res.get("message", "Giriş başarısız."))
         except Exception as e:
-            await msg_wait.edit_text(f"❌ <b>Giriş Hatası:</b> {str(e)}\n\nLütfen kodu doğru girdiğinizden emin olun veya /start ile tekrar deneyin.")
+            await msg_wait.edit_text(get_text(u_data.get("lang", "tr"), "login_error", e=str(e)))
 
     # --- 5. ADIM: 2FA ŞİFRESİ ---
     elif step == "WAIT_2FA_PASSWORD":
         password = message.text.strip()
-        msg_wait = await message.reply_text("⏳ <i>2FA şifresi doğrulanıyor...</i>")
+        msg_wait = await message.reply_text(get_text(u_data.get("lang", "tr"), "verifying_2fa"))
         sess_gen = u_data.get("sess_gen")
 
         try:
@@ -665,13 +562,13 @@ async def ggr_message_flow(client, message):
             else:
                 raise Exception(res.get("message", "2FA Şifresi hatalı."))
         except Exception as e:
-            await msg_wait.edit_text(f"❌ <b>Hata:</b> {str(e)}\n\nLütfen şifrenizi tekrar deneyin veya /cancel yazın.")
+            await msg_wait.edit_text(get_text(u_data.get("lang", "tr"), "2fa_error", e=str(e)))
 
     # --- 6. ADIM: MANUEL BOT TOKEN ---
     elif step == "WAIT_MANUAL_BOT_TOKEN":
         token = message.text.strip()
         if ":" not in token:
-            await message.reply_text("❌ Geçersiz bot token formatı! Örn: `1234567890:ABCdef...`")
+            await message.reply_text(get_text(u_data.get("lang", "tr"), "invalid_bot_token"))
             return
         u_data["bot_token"] = token
         await ggr_deploy_to_render_and_finish(message, u_data, user_id)
@@ -679,7 +576,7 @@ async def ggr_message_flow(client, message):
     # --- BOT KALDIRMA ADIMI ---
     elif step == "KALDIR_API_KEY":
         render_key = message.text.strip()
-        msg_wait = await message.reply_text("⏳ <i>Render hesabınızdaki 'gagaragogo-userbot' servisi aranıyor ve siliniyor...</i>")
+        msg_wait = await message.reply_text(get_text(u_data.get("lang", "tr"), "searching_render_service"))
 
         try:
             deployer = GgrRenderDeployer(render_key)
@@ -725,7 +622,7 @@ async def ggr_start_pyrogram_login(msg_target, u_data, user_id):
     except Exception as e:
         await ggr_safe_edit(
             msg_target,
-            f"❌ Kod gönderilirken hata oluştu: `{str(e)}`\n\nLütfen tekrar deneyin:",
+            get_text(u_data.get("lang", "tr"), "session_code_error", e=str(e)),
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("🔄 Tekrar Dene", callback_data="ggr_retry_login")],
                 [InlineKeyboardButton("❌ İptal", callback_data="ggr_cancel")]
