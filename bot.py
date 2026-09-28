@@ -99,36 +99,8 @@ def ggr_get_start_content(first_name: str, lang: str = "tr"):
         [InlineKeyboardButton(get_text(lang, "btn_github"), url="https://github.com/chaolcam/gagaragogo-kurulum-bot")]
     ])
     return metin, butonlar
-    metin = (
-        f"👋 <b>Merhaba {first_name}!</b>\n\n"
-        f"🤖 <b>GagaraGogo Userbot Otomatik Kurulum Asistanı</b>'na hoş geldiniz.\n\n"
-        f"Bu asistan ile hiçbir kodlama yapmadan:\n"
-        f"1️⃣ Render hesabınıza bağlanır,\n"
-        f"2️⃣ <code>my.telegram.org</code> üzerinden API ID ve HASH alınır,\n"
-        f"3️⃣ String Session üretilir,\n"
-        f"4️⃣ <code>@BotFather</code> üzerinden otomatik yardımcı bot açılır,\n"
-        f"5️⃣ Botunuz Render'a kurulur ve 7/24 Uptime linkiniz teslim edilir!\n\n"
-        f"🔒 <b>Güvenlik & Sıfır Depolama:</b>\n"
-        f"<i>Girdiğiniz telefon, şifre ve kodlar sunucularımızda ASLA depolanmaz.</i>\n\n"
-        f"⏳ <b>Otomatik Gizlilik Koruması:</b>\n"
-        f"• Başarılı kurulumlarda: <b>5 dakika sonra</b>\n"
-        f"• Yarım kalan veya iptal edilen işlemlerde: <b>30 dakika sonra</b>\n"
-        f"bu sohbetteki tüm mesajlar güvenliğiniz için otomatik olarak tamamen silinir!\n\n"
-        f"⚠️ <b>Sorumluluk Reddi (Disclaimer):</b>\n"
-        f"<i>Userbot kullanımı Telegram şartları gereği hesabınız için risk taşıyabilir. Hesabınızdan ve yaptığınız işlemlerden bizzat kendiniz sorumlusunuz; geliştiriciler hiçbir sorumluluk kabul etmez. Kuruluma başlayarak bu şartları peşinen kabul etmiş sayılırsınız.</i>\n\n"
-        f"📂 <b>Açık Kaynak Kodları:</b>\n"
-        f"<a href='https://github.com/chaolcam/gagaragogo-kurulum-bot'>github.com/chaolcam/gagaragogo-kurulum-bot</a>"
-    )
 
-    butonlar = InlineKeyboardMarkup([
-        [InlineKeyboardButton("🚀 Kuruluma Başla", callback_data="ggr_kur_basla")],
-        [InlineKeyboardButton("🗑️ Botumu Hesaptan Kaldır", callback_data="ggr_kaldir_basla")],
-        [InlineKeyboardButton("ℹ️ Güvenlik & Gizlilik", callback_data="ggr_bilgi")],
-        [InlineKeyboardButton("📂 Kaynak Kodları (GitHub)", url="https://github.com/chaolcam/gagaragogo-kurulum-bot")]
-    ])
-    return metin, butonlar
-
-async def ggr_otomatik_sohbet_temizleyici(client, user_id, first_name, delay=300, is_success=True):
+async def ggr_otomatik_sohbet_temizleyici(client: Client, user_id: int, first_name: str, delay: int = 300, is_success: bool = True):
     """
     Belirtilen süre bekler:
     1. Kullanıcıya 'Süre doldu, siliniyor...' uyarısı atar.
@@ -245,9 +217,7 @@ async def ggr_kaldir_cmd(client, message):
     u_data["first_name"] = first_name
 
     await message.reply_text(
-        "🗑️ <b>GagaraGogo Userbot'u Kaldırma</b>\n\n"
-        "Botunuzu Render sunucularından tamamen silmek için lütfen **Render API Anahtarınızı** (`rnd_...`) gönderin:\n\n"
-        "👉 <i>İptal etmek için /cancel yazabilirsiniz.</i>"
+        get_text(u_data.get("lang", "tr"), "remove_bot_msg")
     )
     ggr_schedule_inactivity_cleanup(client, user_id, first_name, timeout_seconds=1800)
 
@@ -304,10 +274,11 @@ async def ggr_callback_handler(client, query):
         await query.answer()
 
         # 1. Resim: Render Adım 1
+        img_prefix = "_EN" if u_data.get("lang") == "en" else ""
         try:
             await client.send_photo(
                 chat_id=user_id,
-                photo=ggr_get_asset_photo("RENDERADIM1.png"),
+                photo=ggr_get_asset_photo(f"RENDERADIM1{img_prefix}.png"),
                 caption=get_text(u_data.get("lang", "tr"), "render_step_1_cap")
             )
         except Exception as e:
@@ -317,7 +288,7 @@ async def ggr_callback_handler(client, query):
         try:
             await client.send_photo(
                 chat_id=user_id,
-                photo=ggr_get_asset_photo("RENDERADIM2.png"),
+                photo=ggr_get_asset_photo(f"RENDERADIM2{img_prefix}.png"),
                 caption=get_text(u_data.get("lang", "tr"), "render_step_2_cap")
             )
         except Exception as e:
@@ -531,17 +502,15 @@ async def ggr_message_flow(client, message):
         sess_gen = u_data.get("sess_gen")
 
         try:
-            res = await sess_gen.sign_in(code)
+            res = await sess_gen.sign_in_code(code)
             if res.get("status") == "success":
-                u_data["string_session"] = res["session_string"]
+                u_data["string_session"] = res["session"]
                 await ggr_ask_botfather_step(msg_wait, u_data, user_id)
 
-            elif res.get("status") == "2fa_required":
+            elif res.get("status") == "2fa_needed":
                 u_data["step"] = "WAIT_2FA_PASSWORD"
                 await msg_wait.edit_text(
-                    "🔐 <b>İki Adımlı Doğrulama (2FA) Şifresi Gerekli</b>\n\n"
-                    "Hesabınızda 2FA şifresi aktif. Lütfen Telegram bulut şifrenizi mesaj olarak gönderin:\n\n"
-                    "🔒 <i>Şifreniz hiçbir yere kaydedilmez, anlık doğrulamadan sonra hafızadan tamamen silinir.</i>"
+                    get_text(u_data.get("lang", "tr"), "need_2fa")
                 )
             else:
                 raise Exception(res.get("message", "Giriş başarısız."))
@@ -555,9 +524,9 @@ async def ggr_message_flow(client, message):
         sess_gen = u_data.get("sess_gen")
 
         try:
-            res = await sess_gen.check_password(password)
+            res = await sess_gen.sign_in_2fa(password)
             if res.get("status") == "success":
-                u_data["string_session"] = res["session_string"]
+                u_data["string_session"] = res["session"]
                 await ggr_ask_botfather_step(msg_wait, u_data, user_id)
             else:
                 raise Exception(res.get("message", "2FA Şifresi hatalı."))
@@ -584,11 +553,10 @@ async def ggr_message_flow(client, message):
 
             if silindi:
                 await msg_wait.edit_text(
-                    "✅ <b>GagaraGogo Userbot Render servisiniz başarıyla silindi!</b>\n\n"
-                    "Tüm sunucu işlemleri ve kaynaklar hesabınızdan tamamen kaldırılmıştır."
+                    get_text(u_data.get("lang", "tr"), "remove_success")
                 )
             else:
-                await msg_wait.edit_text("ℹ️ Render hesabınızda aktif bir 'gagaragogo-userbot' servisi bulunamadı.")
+                await msg_wait.edit_text(get_text(u_data.get("lang", "tr"), "no_render_service"))
             ggr_wipe_user_data(user_id)
         except Exception as e:
             await msg_wait.edit_text(f"❌ Kaldırma Hatası: {str(e)}")
@@ -601,21 +569,15 @@ async def ggr_start_pyrogram_login(msg_target, u_data, user_id):
     """Pyrogram istemcisi ile kullanıcının hesabına giriş kodu gönderir."""
     try:
         sess_gen = GgrSessionGenerator(
-            api_id=u_data["api_id"],
-            api_hash=u_data["api_hash"],
-            phone_number=u_data["phone"]
+            api_id=int(u_data.get("api_id", 2040)),
+            api_hash=str(u_data.get("api_hash", ""))
         )
         u_data["sess_gen"] = sess_gen
-        res = await sess_gen.send_code()
+        res = await sess_gen.send_code(phone=str(u_data.get("phone", "")))
 
-        if res.get("status") == "success":
+        if res.get("status") in (True, "success"):
             u_data["step"] = "WAIT_TG_LOGIN_CODE"
-            metin = (
-                "📱 <b>Telegram Giriş Kodunuz Gönderildi!</b>\n\n"
-                "Lütfen Telegram uygulamanıza gelen giriş kodunu buraya gönderin.\n\n"
-                "⚠️ <b>ÖNEMLİ:</b> Kodu <b>aralarında boşluk bırakarak</b> yazın:\n"
-                "👉 <i>Örnek: <code>1 2 3 4 5</code></i>"
-            )
+            metin = get_text(u_data.get("lang", "tr"), "session_code_sent")
             await ggr_safe_edit(msg_target, metin)
         else:
             raise Exception(res.get("message", "Kod gönderilemedi."))
@@ -624,25 +586,18 @@ async def ggr_start_pyrogram_login(msg_target, u_data, user_id):
             msg_target,
             get_text(u_data.get("lang", "tr"), "session_code_error", e=str(e)),
             reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("🔄 Tekrar Dene", callback_data="ggr_retry_login")],
-                [InlineKeyboardButton("❌ İptal", callback_data="ggr_cancel")]
+                [InlineKeyboardButton(get_text(u_data.get("lang", "tr"), "btn_retry_login"), callback_data="ggr_retry_login")],
+                [InlineKeyboardButton(get_text(u_data.get("lang", "tr"), "btn_cancel"), callback_data="ggr_cancel")]
             ])
         )
 
 async def ggr_ask_botfather_step(msg_target, u_data, user_id):
     """Yardımcı botun otomatik açılmasını veya manuel girilmesini sorar."""
     u_data["step"] = "CHOOSE_BOTFATHER_MODE"
-    metin = (
-        "🔐 <b>String Session Başarıyla Üretildi!</b>\n\n"
-        "🤖 <b>Son Adım: Yardımcı Bot Kurulumu</b>\n\n"
-        "GagaraGogo Userbot'un inline buton menüleri ve ayar paneli için bir yardımcı bota ihtiyacı vardır.\n\n"
-        "Ne yapmak istersiniz?\n"
-        "• <b>Otomatik Oluştur:</b> Botunuz @BotFather ile konuşup saniyeler içinde yeni bot açar ve inline modunu ayarlar.\n"
-        "• <b>Manuel Giriş:</b> Daha önceden aldığınız bir Bot Token'ı kendiniz yapıştırabilirsiniz."
-    )
+    metin = get_text(u_data.get("lang", "tr"), "session_success")
     butonlar = InlineKeyboardMarkup([
-        [InlineKeyboardButton("🤖 Otomatik Bot Aç (Önerilen)", callback_data="ggr_auto_botfather")],
-        [InlineKeyboardButton("✏️ Bot Token'ı Kendim Gireceğim", callback_data="ggr_manual_botfather")]
+        [InlineKeyboardButton(get_text(u_data.get("lang", "tr"), "btn_auto_bot"), callback_data="ggr_auto_botfather")],
+        [InlineKeyboardButton(get_text(u_data.get("lang", "tr"), "btn_manual_bot"), callback_data="ggr_manual_botfather")]
     ])
     await ggr_safe_edit(msg_target, metin, reply_markup=butonlar)
 
@@ -652,8 +607,7 @@ async def ggr_ask_botfather_step(msg_target, u_data, user_id):
 async def ggr_deploy_to_render_and_finish(msg_target, u_data, user_id):
     """Render servisini kurar, UptimeRobot rehberini sunar ve 5 dk otomatik temizleyiciyi başlatır."""
     msg_wait = await msg_target.reply_text(
-        "🚀 <b>GagaraGogo Kurulumu Başlatılıyor...</b>\n\n"
-        "Render hesabınızda <code>gagaragogo-userbot</code> servisi oluşturuluyor ve değişkenler yükleniyor..."
+        get_text(u_data.get("lang", "tr"), "deploy_starting")
     )
 
     try:
@@ -671,39 +625,26 @@ async def ggr_deploy_to_render_and_finish(msg_target, u_data, user_id):
         app_live_url = deploy_result.get("service_url")
         dashboard_url = deploy_result.get("dashboard_url") or f"https://dashboard.render.com/web/{service_id}"
 
-        basari_metni = (
-            f"🎉 <b>TEBRİKLER! GAGARAGOGO USERBOT KURULDU!</b>\n\n"
-            f"🚀 <b>Render Web Servisiniz Başlatıldı:</b>\n"
-            f"• <b>Servis Adı:</b> <code>{deploy_result['name']}</code>\n"
-            f"• <b>Size Özel Canlı Web Adresi:</b> <code>{app_live_url}</code>\n"
-            f"• <b>Panel Linki:</b> <a href='{dashboard_url}'>Render Dashboard</a>\n\n"
-            f"🔑 <b>Hesap Anahtarlarınız:</b>\n"
-            f"• API ID: <code>{u_data['api_id']}</code>\n"
-            f"• API HASH: <code>{u_data['api_hash']}</code>\n"
-            f"• YARDIMCI BOT: <code>{u_data.get('bot_username', 'Aktif')}</code>\n\n"
-            f"━━━━━━━━━━━━━━━━━━━━\n"
-            f"⚡ <b>BOTUN 7/24 SÜRESİZ VE KESİNTİSİZ ÇALIŞMASI İÇİN:</b>\n\n"
-            f"Render ücretsiz planları 15 dakika istek almadığında uyku moduna geçer. Botunuzun <b>hiç uyumaması ve 7/24 kesintisiz çalışması için</b> aşağıdaki 2 resimli UptimeRobot adımını tamamlayın:\n\n"
-            f"🔗 <b>Size Özel Canlı Web Adresiniz:</b>\n👉 <code>{app_live_url}</code>\n\n"
-            f"━━━━━━━━━━━━━━━━━━━━\n"
-            f"⏳ <b>Gizlilik & Güvenlik Koruması:</b>\n"
-            f"<i>Güvenliğiniz için bu sohbetteki tüm kurulum mesajları ve anahtarlar <b>5 dakika sonra otomatik olarak silinecektir</b>. Kurulum bilgileriniz Kayıtlı Mesajlar (Saved Messages) kutunuza güvenle yedeklenmiştir!</i>\n\n"
-            f"📂 <b>Açık Kaynak Kodları:</b> <a href='https://github.com/chaolcam/gagaragogo-kurulum-bot'>GitHub Depomuz</a>\n\n"
-            f"Telegram'da herhangi bir sohbete <code>.alive</code> yazarak botunuzu test edebilirsiniz!"
+        basari_metni = get_text(
+            u_data.get("lang", "tr"),
+            "deploy_success",
+            name=deploy_result['name'],
+            app_live_url=app_live_url,
+            dashboard_url=dashboard_url,
+            api_id=u_data['api_id'],
+            api_hash=u_data['api_hash'],
+            bot_username=u_data.get('bot_username', 'Aktif')
         )
 
         await msg_wait.edit_text(basari_metni, disable_web_page_preview=True)
 
         # 1. Resim: UptimeRobot Adım 1
+        img_prefix = "_EN" if u_data.get("lang") == "en" else ""
         try:
             await ggr_app.send_photo(
                 chat_id=user_id,
-                photo=ggr_get_asset_photo("UPTIMEADIM1.png"),
-                caption=(
-                    "📸 <b>UptimeRobot - 1. Adım:</b>\n"
-                    "<a href='https://uptimerobot.com/'>uptimerobot.com</a> adresine gidin. "
-                    "Daire içindeki <b>+ New</b> butonunun yanındaki oka basarak açılan menüden <b>Single monitor</b> seçeneğine tıklayın."
-                )
+                photo=ggr_get_asset_photo(f"UPTIMEADIM1{img_prefix}.png"),
+                caption=get_text(u_data.get("lang", "tr"), "uptime_step_1_cap")
             )
         except Exception as e:
             logging.warning(f"UptimeRobot Adım 1 görsel gönderme hatası: {e}")
@@ -712,13 +653,8 @@ async def ggr_deploy_to_render_and_finish(msg_target, u_data, user_id):
         try:
             await ggr_app.send_photo(
                 chat_id=user_id,
-                photo=ggr_get_asset_photo("UPTIMEADIM2.png"),
-                caption=(
-                    f"📸 <b>UptimeRobot - 2. Adım:</b>\n"
-                    f"URL kutusuna botun size verdiği canlı linkin tamamını yapıştırın:\n"
-                    f"👉 <code>{app_live_url}</code>\n\n"
-                    f"Ardından en alttaki <b>Create monitor</b> butonuna basın. Başka hiçbir şey yapmanıza gerek yoktur, botunuz 7/24 aktif kalacaktır!"
-                )
+                photo=ggr_get_asset_photo(f"UPTIMEADIM2{img_prefix}.png"),
+                caption=get_text(u_data.get("lang", "tr"), "uptime_step_2_cap", app_live_url=app_live_url)
             )
         except Exception as e:
             logging.warning(f"UptimeRobot Adım 2 görsel gönderme hatası: {e}")
@@ -733,7 +669,8 @@ async def ggr_deploy_to_render_and_finish(msg_target, u_data, user_id):
                 in_memory=True
             )
             await temp_client.connect()
-            await temp_client.send_message("me", f"🔐 <b>GagaraGogo Userbot Yedek ve Uptime Bilgileriniz:</b>\n\n{basari_metni}", disable_web_page_preview=True)
+            backup_msg = get_text(u_data.get("lang", "tr"), "backup_info", basari_metni=basari_metni)
+            await temp_client.send_message("me", backup_msg, disable_web_page_preview=True)
             try:
                 await temp_client.join_chat("gagaragogouserbot")
             except Exception:
@@ -752,7 +689,7 @@ async def ggr_deploy_to_render_and_finish(msg_target, u_data, user_id):
         )
 
     except Exception as e:
-        await msg_wait.edit_text(f"❌ Render Deploy Hatası:\n`{str(e)}`")
+        await msg_wait.edit_text(get_text(u_data.get("lang", "tr"), "deploy_error", e=str(e)))
     finally:
         ggr_wipe_user_data(user_id)
 
