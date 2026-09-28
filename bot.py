@@ -50,14 +50,16 @@ def ggr_get_user_data(user_id):
     return ggr_user_sessions[user_id]
 
 def ggr_wipe_user_data(user_id):
-    """Kullanıcının tüm hassas verilerini RAM'den tamamen siler."""
+    """Kullanıcının tüm hassas verilerini RAM'den tamamen siler, sadece dil seçimini korur."""
     if user_id in ggr_user_sessions:
         data = ggr_user_sessions[user_id]
+        lang = data.get("lang", "tr")
         if "my_tg" in data and data["my_tg"]:
             data["my_tg"].close()
         if "sess_gen" in data and data["sess_gen"]:
             asyncio.create_task(data["sess_gen"].disconnect())
         del ggr_user_sessions[user_id]
+        ggr_user_sessions[user_id] = {"lang": lang}
 
 def ggr_cancel_user_timer(user_id):
     """Kullanıcının bekleyen temizlik görevini iptal eder."""
@@ -489,8 +491,7 @@ async def ggr_message_flow(client, message):
                 raise Exception("API ID ve HASH otomatik oluşturulamadı.")
         except Exception as e:
             await msg_wait.edit_text(
-                f"❌ <b>Hata:</b> {str(e)}\n\n"
-                f"Lütfen kodu doğru girdiğinizden emin olun (Örn: <code>9 3 9 6 4</code>) veya /start ile baştan deneyin."
+                get_text(u_data.get("lang", "tr"), "login_error", e=str(e))
             )
 
     # --- 4. ADIM: PYROGRAM TELEGRAM GİRİŞ KODU ---
@@ -559,7 +560,7 @@ async def ggr_message_flow(client, message):
                 await msg_wait.edit_text(get_text(u_data.get("lang", "tr"), "no_render_service"))
             ggr_wipe_user_data(user_id)
         except Exception as e:
-            await msg_wait.edit_text(f"❌ Kaldırma Hatası: {str(e)}")
+            await msg_wait.edit_text(get_text(u_data.get("lang", "tr"), "remove_error", e=str(e)))
             ggr_wipe_user_data(user_id)
 
 # =====================================================================
